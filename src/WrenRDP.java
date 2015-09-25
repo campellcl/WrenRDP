@@ -84,7 +84,7 @@ public class WrenRDP extends RDP implements WrenTokens {
     		match(COMMA_TOK);
     		varlist();
     	} else {
-    		//TODO: Lambda. Do nothing.
+    		//TODO: Lambda. Do nothing. Right?
     	}
     }
     /**
@@ -127,7 +127,8 @@ public class WrenRDP extends RDP implements WrenTokens {
     			match(WHILE_TOK);
     			break;
     		case IF_TOK:
-    			//Not sure if this is done according to correct methodology. 
+    			//TODO: Warning: Nested If.
+    			//	Not sure if this is done according to correct methodology. 
     			match(IF_TOK);
     			boolexpr();
     			match(THEN_TOK);
@@ -172,14 +173,19 @@ public class WrenRDP extends RDP implements WrenTokens {
     	}
     }
     private void if2() {
+    	//TODO: method body.
     }
     private void intexpr() {
+    	//TODO: method body.
     }
     private void intexpr2() {
+    	//TODO: method body.
     }
     private void intterm() {
+    	//TODO: method body.
     }
     private void intterm2() {
+    	//TODO: method body.
     }
     private void strong_op() {
     	if (currTok == MUL_TOK) {
@@ -208,15 +214,19 @@ public class WrenRDP extends RDP implements WrenTokens {
     	*/
     }
     private void boolexpr() {
-    	//boolterm
+    	//TODO: method body.
     }
     private void boolexpr2() {
+    	//TODO: method body.
     }
     private void boolterm() {
+    	//TODO: method body.
     }
     private void boolterm2() {
+    	//TODO: method body.
     }
     private void relation() {
+    	//TODO: method body.
     	/* Figure out how to do this one...
     	switch (currTok) {
     		case LE_TOK:
