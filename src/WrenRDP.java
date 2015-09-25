@@ -231,6 +231,10 @@ public class WrenRDP extends RDP implements WrenTokens {
     	}
     	*/
     }
+    /**
+     * Instructor provided function below
+     * DO NOT MODIFY
+     */
     private void boolelement() {
 	if (currTok == TRUE_TOK) match(TRUE_TOK);
 	else if (currTok == FALSE_TOK) match(FALSE_TOK);
