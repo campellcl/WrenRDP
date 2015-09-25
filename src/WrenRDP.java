@@ -41,7 +41,7 @@ public class WrenRDP extends RDP implements WrenTokens {
     private void decseq() {
     	//TODO: How to do lambda sequence & recursion?
     	/*
-    	 * if (currTok == LAMBDA_TOK) {
+    	 * if (currTok == lambda) {
     	 * 		//do nothing
     	 * } else {
     	 * 		error("in decseq()");
@@ -54,7 +54,9 @@ public class WrenRDP extends RDP implements WrenTokens {
     	if (currTok == VAR_TOK) {
     		match(VAR_TOK);
     		varlist();
+    		match(COLON_TOK);
     		type();
+    		match(SEMICOLON_TOK);
     	} else {
     		error("in dec()");
     	}
@@ -79,8 +81,7 @@ public class WrenRDP extends RDP implements WrenTokens {
     }
     private void varlist2() {
     	//There might be an error below...
-    	if (currTok == VARIABLE_TOK) {
-    		match(VARIABLE_TOK);
+    	if (currTok == COMMA_TOK) {
     		match(COMMA_TOK);
     		varlist();
     	} else {
@@ -137,9 +138,10 @@ public class WrenRDP extends RDP implements WrenTokens {
     				break;
     			}
     		//TODO: Fix below code.
+    		case VARIABLE_TOK:
+    			//IDENTIFIER
+    			match(VARIABLE_TOK);
     		/*
-    		case assign():
-    			//do something?
     		case commandseq():
     			//do something?
     		*/
@@ -192,8 +194,15 @@ public class WrenRDP extends RDP implements WrenTokens {
     	}
     }
     private void intelement() {
+    	//TODO: NUMERAL_TOK == INT_CONST.
+    	/*switch(currTok) {
+    		case NUM_TOK:
+    			
+    	}
+    	*/
     }
     private void boolexpr() {
+    	//boolterm
     }
     private void boolexpr2() {
     }
