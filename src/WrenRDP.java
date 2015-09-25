@@ -84,7 +84,7 @@ public class WrenRDP extends RDP implements WrenTokens {
     		match(COMMA_TOK);
     		varlist();
     	} else {
-    		error("in varlist2()");
+    		//TODO: Lambda. Do nothing.
     	}
     }
     /**
@@ -93,8 +93,15 @@ public class WrenRDP extends RDP implements WrenTokens {
      */
     private void commandseq() {
     	//TODO: Resolve common left prefix
-    	//This does not seem right...
-    	command();
+    	//Help filling out if statement?
+    	//	He said the if-check was still required.
+    	/*
+    	if (currTok == ?) {
+    		command();
+    	} else {
+    		error("in commandseq()");
+    	}
+    	*/
     }
     private void commandseq2() {
     }
