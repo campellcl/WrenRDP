@@ -206,12 +206,27 @@ public class WrenRDP extends RDP implements WrenTokens {
     	}
     }
     private void intelement() {
-    	//TODO: NUMERAL_TOK == INT_CONST.
-    	/*switch(currTok) {
-    		case NUM_TOK:
-    			
+    	switch(currTok) {
+    		case INTCONST_TOK:
+    			match(INTCONST_TOK);
+    			break;
+    		case VARIABLE_TOK:
+    			match(VARIABLE_TOK);
+    			break;
+    		case LPAR_TOK:
+    			match(LPAR_TOK);
+    			intexpr();
+    			match(RPAR_TOK);
+    			break;
+    		case MINUS_TOK:
+    			match(MINUS_TOK);
+    			//TODO: Recursive call correct here?
+    			intelement();
+    			break;
+    		default:
+    			error("in intelement()");
+    			break;
     	}
-    	*/
     }
     private void boolexpr() {
     	//TODO: method body.
