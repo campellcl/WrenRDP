@@ -39,16 +39,15 @@ public class WrenRDP extends RDP implements WrenTokens {
     	}
     }
     private void decseq() {
-    	//TODO: How to do lambda sequence & recursion?
-    	/*
-    	 * if (currTok == lambda) {
-    	 * 		//do nothing
-    	 * } else {
-    	 * 		error("in decseq()");
-    	 * }
-    	dec();
-    	decseq();
-    	*/
+    	//if currTok = firstOf(dec)...
+    	if (currTok == VAR_TOK)
+    	{
+    		dec();
+    		//TODO: Recursive call correct here?
+    		decseq();
+    	} else {
+    		//Lambda, do nothing. 
+    	}
     }
     private void dec() {
     	if (currTok == VAR_TOK) {
