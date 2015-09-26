@@ -28,8 +28,20 @@ public class WrenRDP extends RDP implements WrenTokens {
     		error("in program()");
     	}
     }
+    /**
+     *  <block> ::= <decseq> begin <commandfqseq> end
+     *  The issue here is that:
+     * 	first(<block>) = first(<decseq>); Whereas,
+     *  <decseq> ::= <dec> <decseq> | lambda
+     *  Since there is a lambda production in <decseq>,
+     *  we must union first(<decseq>) with first(begin). 
+     *  Hence, first(<block>) = first(<decseq>) U begin;
+     *  	where first(<decseq>) = <dec>
+     *  		and first(<dec>) = var.
+     *  So that: first(<block>) = VAR_TOK Union BEGIN_TOK.
+     */
     private void block() {
-    	if (currTok == VARIABLE_TOK || currTok == BEGIN_TOK) {		
+    	if (currTok == VAR_TOK || currTok == BEGIN_TOK) {		
     		decseq();
     		match(BEGIN_TOK);
     		commandseq();
@@ -38,17 +50,26 @@ public class WrenRDP extends RDP implements WrenTokens {
     		error("in block()");
     	}
     }
+    /**
+     * Here we have <decseq> ::= <dec> <decseq> | lambda
+     * So that first(<decseq>) = first(<dec>)
+     * 	where first(<dec>) = var
+     *  	so that first(<dec>) = VAR_TOK. 
+     */
     private void decseq() {
-    	//if currTok = firstOf(dec)...
+    	//if currTok = first(<dec>).
     	if (currTok == VAR_TOK)
     	{
     		dec();
-    		//TODO: Recursive call correct here?
     		decseq();
     	} else {
     		//Lambda, do nothing. 
     	}
     }
+    /**
+     * Nice and easy, since:
+     * 	first(<dec>) = VAR_TOK
+     */
     private void dec() {
     	if (currTok == VAR_TOK) {
     		match(VAR_TOK);
@@ -60,6 +81,9 @@ public class WrenRDP extends RDP implements WrenTokens {
     		error("in dec()");
     	}
     }
+    /**
+     * first(<type>) = INT_TOK | BOOL_TOK
+     */
     private void type() {
     	if (currTok == INT_TOK) {
     		match(INT_TOK);
@@ -69,6 +93,14 @@ public class WrenRDP extends RDP implements WrenTokens {
     		error("in type()");
     	}
     }
+    /**
+     * Left common prefix since:
+     * <varlist> = IDENTIFER | IDENTIFER, <varlist>
+     * 	the first(<varlist>) = IDENTIFER | IDENTIFIER
+     * We must modify the grammar so that:
+     * first(<varlist>) = <varlist2>
+     * 	where first(<varlist2>) = COMMA_TOK | lambda
+     */
     private void varlist() {
     	//Resolved left common prefix.
     	if (currTok == VARIABLE_TOK) {
@@ -78,23 +110,46 @@ public class WrenRDP extends RDP implements WrenTokens {
     		error("in varlist()");
     	}
     }
+    /**
+     * Resolved left common prefix in <varlist>
+     * <varlist2> = , <varlist> | lambda
+     */
     private void varlist2() {
-    	//There might be an error below...
     	if (currTok == COMMA_TOK) {
     		match(COMMA_TOK);
     		varlist();
     	} else {
-    		//TODO: Lambda. Do nothing. Right?
+    		//Lambda. Do nothing.
     	}
     }
     /**
-     * Need help with this method.
-     * how to deal with recursion here?
+     * Resolve left common prefix in production:
+     * 	<commandseq> ::= <command> | <command> ; <commandseq>
+     * Create a new non-terminal:
+     * 	<commandseq> ::= <commandseq2> ; <commandseq> | <commandseq2>
+     * So that first(<commandseq>) = first(<commandseq2>)
+     * 	
      */
     private void commandseq() {
-    	//TODO: Resolve common left prefix
-    	//Help filling out if statement?
+    	//Resolved left common prefix. 
+    	//TODO: Help filling out if statement?
     	//	He said the if-check was still required.
+    	//if (currTok == first(<command>)
+    	switch(currTok) {
+    		case SKIP_TOK:
+    		case READ_TOK:
+    		case WRITE_TOK:
+    		case WHILE_TOK:
+    		case IF_TOK:
+    		//case first(<assign>):
+    		//TODO: find first(<assign>);
+    		//case first(<commandseq>)
+    		//TODO: resolve left common prefix in
+    		//	first(<commandseq>)
+    		default: 
+    			error("in commandSeq()");
+    			break;
+    	}
     	/*
     	if (currTok == ?) {
     		command();
