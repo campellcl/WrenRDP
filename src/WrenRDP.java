@@ -212,9 +212,26 @@ public class WrenRDP extends RDP implements WrenTokens {
     			break;
     	}
     }
+    /**
+     * Resolve left-common prefix:
+     * 	<assign> ::= IDENTIFIER = <intexpr>
+     * 			| IDENTIFIER :=: <boolexpr>
+     * Where first(<assign>) = <assign2>
+     */
+    private void assign() {
+    	if (currTok == VARIABLE_TOK) {
+    		match(VARIABLE_TOK);
+    		assign2();
+    	} else {
+    		error("in assign()");
+    	}
+    }
+    /**
+     * <assign2> ::= :=: <boolexpr> | = <intexpr>
+     * first(<assign2>) = COLON_TOK | EQUAL_TOK
+     */
     private void assign2() {
-    	//TODO: I was very tired... make sure this is right.
-    	match(VARIABLE_TOK);
+    	//Resolved common left prefix.
     	if (currTok == EQ_TOK) {
     		match(EQ_TOK);
     		intexpr();
@@ -295,27 +312,59 @@ public class WrenRDP extends RDP implements WrenTokens {
     private void boolterm2() {
     	//TODO: method body.
     }
+    /**
+     * Fix common left prefix problem:
+     * 	<relation> ::= <= | < | = | <> | >= | >
+     * So that:
+     * 	<relation> ::= <relation2> | = | <relation3>
+     * Hence:
+     *  first(<relation>) = first(<relation2>) U EQ_TOK U first(<relation3>)
+     */
     private void relation() {
-    	//TODO: method body.
-    	/* Figure out how to do this one...
+    	//TODO: Is this done correctly?
     	switch (currTok) {
-    		case LE_TOK:
-    			match(LE_TOK);
-    			break;
     		case LT_TOK:
-    			match(LT_TOK);
+    			match(LE_TOK);
+    			relation2();
     			break;
     		case EQ_TOK:
     			match(EQ_TOK);
     			break;
-    		case <>:
-    			match(?)
-    			break;
+    		case GT_TOK:
+    			match(GT_TOK);
+    			relation3();
     		default:
     			error("in relation()");
     			break;
     	}
-    	*/
+    }
+    /**
+     * Created by me. This could be incorrect.
+     * <relation2> ::= EQ_TOK | GE_TOK | lambda
+     * So that:
+     *  first(<relation2>) = EQ_TOK U GE_TOK U lambda
+     */
+    private void relation2() {
+    	if (currTok == EQ_TOK) {
+    		match(EQ_TOK);
+    	} else if (currTok == GE_TOK) {
+    		match(GE_TOK);
+    	} else {
+    		//lambda, do nothing. 
+    	}
+    }
+    /**
+     * Created by me. This could be incorrect.
+     * <relation3> ::= EQ_TOK | lambda
+     * So that:
+     * 	first(<relation3>) = EQ_TOK U lambda
+     */
+    private void relation3() {
+    	if (currTok == EQ_TOK) {
+    		match(EQ_TOK);
+    	} else {
+    		//lambda, do nothing. 
+    	}
     }
     /**
      * Instructor provided function below
