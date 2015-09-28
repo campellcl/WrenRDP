@@ -141,7 +141,8 @@ public class WrenRDP extends RDP implements WrenTokens {
     		case IF_TOK:
     		//case first(<assign>):
     		case VARIABLE_TOK:
-    			match(currTok);
+    			//don't match match(currTok);
+    			command();
     			commandseq2();
     			break;
     		default: 
@@ -150,8 +151,8 @@ public class WrenRDP extends RDP implements WrenTokens {
     	}
     }
     private void commandseq2() {
-    	if (currTok == COLON_TOK) {
-    		match(COLON_TOK);
+    	if (currTok == SEMICOLON_TOK) {
+    		match(SEMICOLON_TOK);
     		commandseq();
     	} else {
     		//lambda. Do nothing.
