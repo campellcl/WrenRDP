@@ -142,7 +142,7 @@ public class WrenRDP extends RDP implements WrenTokens {
     		case WHILE_TOK:
     		case IF_TOK:
     		//case first(<assign>):
-    		//TODO: find first(<assign>);
+    		case EQ_TOK:
     		//case first(<commandseq>)
     		//TODO: resolve left common prefix in
     		//	first(<commandseq>)
@@ -191,22 +191,15 @@ public class WrenRDP extends RDP implements WrenTokens {
     			if (currTok == END_TOK) {
     				match(END_TOK);
     				match(IF_TOK);
-    				break;
     			} else if (currTok == ELSE_TOK) {
     				match(ELSE_TOK);
-    				break;
+    				commandseq();
+    				match(END_TOK);
+    				match(IF_TOK);
     			} else {
     				error("in command()");
-    				break;
     			}
-    		//TODO: Fix below code.
-    		case VARIABLE_TOK:
-    			//IDENTIFIER
-    			match(VARIABLE_TOK);
-    		/*
-    		case commandseq():
-    			//do something?
-    		*/
+    			break;
     		default:
     			error("in command()");
     			break;
@@ -232,13 +225,9 @@ public class WrenRDP extends RDP implements WrenTokens {
      */
     private void assign2() {
     	//Resolved common left prefix.
-    	if (currTok == EQ_TOK) {
-    		match(EQ_TOK);
+    	if (currTok == INTASSIGN_TOK) {
     		intexpr();
-    	} else if (currTok == COLON_TOK) {
-    		match(COLON_TOK);
-    		match(EQ_TOK);
-    		match(COLON_TOK);
+    	} else if (currTok == BOOLASSIGN_TOK) {
     		boolexpr();
     	} else {
     		error("in assign2()");
@@ -247,14 +236,65 @@ public class WrenRDP extends RDP implements WrenTokens {
     private void if2() {
     	//TODO: method body.
     }
+    /**
+     * <intexpr> ::= <intterm> | <intexpr> <weak_op> <intterm>
+     * 
+     */
     private void intexpr() {
     	//TODO: method body. Resolve L-recursion
+    	//first(<
     }
     private void intexpr2() {
     	//TODO: method body.
     }
     private void intterm() {
-    	//TODO: method body.
+    	//TODO: method body. Resolve L-recursion
+    	switch(currTok) {
+    		case MUL_TOK:
+    		case DIV_TOK:
+    			//currTok == first(<strong_op>)
+    			strong_op();
+    			break;
+    		case INTCONST_TOK:
+    		case VARIABLE_TOK:
+    		case LPAR_TOK:
+    		case MINUS_TOK:
+    			//currTok == first(<intelement>)
+    			intelement();
+    			break;
+    		/*
+    		case INTCONST_TOK:
+    			//currTok == first(<intelement>)
+    			match(INTCONST_TOK);
+    			break;
+    		case VARIABLE_TOK:
+    			//currTok == first(<intelement>)
+    			match(VARIABLE_TOK);
+    			break;
+    		case LPAR_TOK:
+    			//currTok == first(<intelement>)
+    			match(LPAR_TOK);
+    			break;
+    		case MINUS_TOK:
+    			//currTok == first(<intelement>)
+    			match(MINUS_TOK);
+    			break;
+    			*/
+    		default:
+    			//error("in intterm()");
+    			break;
+    	}
+    	//if (currTok == first(<strong_op>)
+    	if (currTok == MUL_TOK || currTok == DIV_TOK) {
+    		
+    		intelement();
+    	} else if (currTok == INTCONST_TOK || currTok == VARIABLE_TOK || 
+    			currTok == LPAR_TOK || currTok == MINUS_TOK) {
+    		//
+    	}
+    	else {
+    		
+    	}		
     }
     private void intterm2() {
     	//TODO: method body.
@@ -300,17 +340,48 @@ public class WrenRDP extends RDP implements WrenTokens {
     			break;
     	}
     }
+    /**
+     * <boolexpr> ::= <boolexpr> or <boolterm> | <boolterm>
+     * Left recursion problem. A->AaB | B
+     */
     private void boolexpr() {
-    	//TODO: method body.
+    	//TODO: method body, resolve L-recursion.
     }
     private void boolexpr2() {
     	//TODO: method body.
     }
+    /**
+     * <boolterm> ::= <boolterm> and <boolelement> | <boolelement>
+     * Left recursion problem. A->AaB | B
+     * 
+     */
     private void boolterm() {
-    	//TODO: method body.
+    	//Resolved L-recursion
+    	//if first(<boolelement>)
+    	switch(currTok) {
+    		case TRUE_TOK:
+    		case FALSE_TOK:
+    		case NOT_TOK:
+    		case LBRACK_TOK:
+    		case VARIABLE_TOK:
+    		//first(<intexpr>)?? 
+    		case INTCONST_TOK:
+    		//case VARIABLE_TOK
+    		case LPAR_TOK:
+    		case MINUS_TOK:
+    			boolterm();
+    			boolterm2();
+    			break;
+    	}
     }
     private void boolterm2() {
-    	//TODO: method body.
+    	if(currTok == AND_TOK) {
+    		match(AND_TOK);
+    		boolelement();
+    		boolterm2();
+    	} else {
+    		//lambda, do nothing.
+    	}
     }
     /**
      * Fix common left prefix problem:
