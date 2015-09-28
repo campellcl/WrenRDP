@@ -132,9 +132,7 @@ public class WrenRDP extends RDP implements WrenTokens {
      */
     private void commandseq() {
     	//Resolved left common prefix. 
-    	//TODO: Help filling out if statement?
-    	//	He said the if-check was still required.
-    	//if (currTok == first(<command>)
+    	//if (currTok == first(<command>))
     	switch(currTok) {
     		case SKIP_TOK:
     		case READ_TOK:
@@ -142,23 +140,22 @@ public class WrenRDP extends RDP implements WrenTokens {
     		case WHILE_TOK:
     		case IF_TOK:
     		//case first(<assign>):
-    		case EQ_TOK:
-    		//case first(<commandseq>)
-    		//TODO: resolve left common prefix in
-    		//	first(<commandseq>)
+    		case VARIABLE_TOK:
+    			match(currTok);
+    			commandseq2();
+    			break;
     		default: 
     			error("in commandSeq()");
     			break;
     	}
-    	/*
-    	if (currTok == ?) {
-    		command();
-    	} else {
-    		error("in commandseq()");
-    	}
-    	*/
     }
     private void commandseq2() {
+    	if (currTok == COLON_TOK) {
+    		match(COLON_TOK);
+    		commandseq();
+    	} else {
+    		//lambda. Do nothing.
+    	}
     }
     private void command() {
     	switch(currTok) {
@@ -182,27 +179,34 @@ public class WrenRDP extends RDP implements WrenTokens {
     			match(WHILE_TOK);
     			break;
     		case IF_TOK:
-    			//TODO: Warning: Nested If.
-    			//	Not sure if this is done according to correct methodology. 
+    			//TODO: Verify that this is correct.
     			match(IF_TOK);
     			boolexpr();
     			match(THEN_TOK);
     			commandseq();
-    			if (currTok == END_TOK) {
-    				match(END_TOK);
-    				match(IF_TOK);
-    			} else if (currTok == ELSE_TOK) {
-    				match(ELSE_TOK);
-    				commandseq();
-    				match(END_TOK);
-    				match(IF_TOK);
-    			} else {
-    				error("in command()");
-    			}
+    			if2();
+    			break;
+    		//if (curTok == first(<assign>))
+    		case VARIABLE_TOK:
+    			assign();
     			break;
     		default:
     			error("in command()");
     			break;
+    	}
+    }
+    private void if2() {
+    	//TODO: Verify that this is correct
+    	if (currTok == END_TOK) {
+    		match(END_TOK);
+    		match(IF_TOK);
+    	} else if (currTok == ELSE_TOK) {
+    		match(ELSE_TOK);
+    		commandseq();
+    		match(END_TOK);
+    		match(IF_TOK);
+    	} else {
+    		error("in if2()");
     	}
     }
     /**
@@ -233,88 +237,65 @@ public class WrenRDP extends RDP implements WrenTokens {
     		error("in assign2()");
     	}
     }
-    private void if2() {
-    	//TODO: method body.
-    }
     /**
      * <intexpr> ::= <intterm> | <intexpr> <weak_op> <intterm>
-     * 
+     * Resolved L-recursion.
      */
     private void intexpr() {
-    	//TODO: method body. Resolve L-recursion
-    	//first(<
+    	//TODO: Verify this is correct.
+    	//if (currTok == first(<intterm>))
+    	switch(currTok) {
+    		case INTCONST_TOK:
+    		case VARIABLE_TOK:
+    		case LPAR_TOK:
+    		case MINUS_TOK:
+    			intexpr2();
+    			break;
+    		default:
+    			error("in intexpr()");
+    			break;
+    	}
     }
     private void intexpr2() {
-    	//TODO: method body.
+    	//TODO: Verify this is correct.
+    	//if (currTok == first(<weak_op>))
+    	if (currTok == PLUS_TOK || currTok == MINUS_TOK) {
+    		weak_op();
+    		intterm();
+    		intexpr2();
+    	} else {
+    		//lambda, do nothing.
+    	}
     }
+    /**
+     * <intterm> ::= <intterm> <strongop> <element> | <element>
+     * Resolved L-recursion
+     */
     private void intterm() {
-    	//TODO: method body. Resolve L-recursion
+    	//TODO: Verify this is correct.
+    	//if (currTok == first(<element>)
     	switch(currTok) {
-    		case MUL_TOK:
-    		case DIV_TOK:
-    			//currTok == first(<strong_op>)
-    			strong_op();
-    			break;
     		case INTCONST_TOK:
     		case VARIABLE_TOK:
     		case LPAR_TOK:
     		case MINUS_TOK:
-    			//currTok == first(<intelement>)
     			intelement();
+    			intterm2();
     			break;
-    		/*
-    		case INTCONST_TOK:
-    			//currTok == first(<intelement>)
-    			match(INTCONST_TOK);
-    			break;
-    		case VARIABLE_TOK:
-    			//currTok == first(<intelement>)
-    			match(VARIABLE_TOK);
-    			break;
-    		case LPAR_TOK:
-    			//currTok == first(<intelement>)
-    			match(LPAR_TOK);
-    			break;
-    		case MINUS_TOK:
-    			//currTok == first(<intelement>)
-    			match(MINUS_TOK);
-    			break;
-    			*/
     		default:
-    			//error("in intterm()");
+    			error("in intterm()");
     			break;
     	}
-    	//if (currTok == first(<strong_op>)
-    	if (currTok == MUL_TOK || currTok == DIV_TOK) {
-    		
-    		intelement();
-    	} else if (currTok == INTCONST_TOK || currTok == VARIABLE_TOK || 
-    			currTok == LPAR_TOK || currTok == MINUS_TOK) {
-    		//
-    	}
-    	else {
-    		
-    	}		
     }
     private void intterm2() {
     	//TODO: method body.
-    }
-    private void strong_op() {
-    	if (currTok == MUL_TOK) {
-    		match(MUL_TOK);
-    	} else if (currTok == DIV_TOK) {
-    		match(DIV_TOK);
+    	//if (currTok == first(<strong_op>))
+    	if (currTok == MUL_TOK || currTok == DIV_TOK) {
+    		strong_op();
+    		intelement();
+    		intterm2();
     	} else {
-    		error("in strong_op()");
-    	}
-    }
-    private void weak_op() {
-    	if (currTok == PLUS_TOK) {
-    		match(PLUS_TOK);
-    	} else if (currTok == MINUS_TOK) {
-    		match(MINUS_TOK);
-    	} else {
-    		error("in weak_op()");
+    		//lambda, do nothing. 
     	}
     }
     private void intelement() {
@@ -332,7 +313,6 @@ public class WrenRDP extends RDP implements WrenTokens {
     			break;
     		case MINUS_TOK:
     			match(MINUS_TOK);
-    			//TODO: Recursive call correct here?
     			intelement();
     			break;
     		default:
@@ -345,10 +325,35 @@ public class WrenRDP extends RDP implements WrenTokens {
      * Left recursion problem. A->AaB | B
      */
     private void boolexpr() {
-    	//TODO: method body, resolve L-recursion.
+    	//TODO: Verify this is correct.
+    	//if (currTok == first(<boolterm>))
+    	switch(currTok) {
+    		case TRUE_TOK:
+    		case FALSE_TOK:
+    		case NOT_TOK:
+    		case LBRACK_TOK:
+    		case VARIABLE_TOK:
+    		//first(<intexpr>)
+    		case INTCONST_TOK:
+    		//case VARIABLE_TOK:
+    		case LPAR_TOK:
+    		case MINUS_TOK:
+    			boolterm();
+    			boolexpr2();
+    			break;
+    		default:
+    			error("in boolexpr()");
+    			break;
+    	}
     }
     private void boolexpr2() {
-    	//TODO: method body.
+    	//TODO: Verify this is correct.
+    	if (currTok == OR_TOK) {
+    		boolterm();
+    		boolexpr2();
+    	} else {
+    		//lambda, do nothing. 
+    	}
     }
     /**
      * <boolterm> ::= <boolterm> and <boolelement> | <boolelement>
@@ -384,6 +389,46 @@ public class WrenRDP extends RDP implements WrenTokens {
     	}
     }
     /**
+     * Instructor provided function below
+     * DO NOT MODIFY
+     */
+    private void boolelement() {
+    	if (currTok == TRUE_TOK) match(TRUE_TOK);
+    	else if (currTok == FALSE_TOK) match(FALSE_TOK);
+    	else if (currTok == NOT_TOK) {
+    		match(NOT_TOK);
+    		match(LBRACK_TOK);
+    		boolexpr();
+    		match(RBRACK_TOK);
+    	}
+    	else if (currTok == LBRACK_TOK) {
+    		match(LBRACK_TOK);
+    		boolexpr();
+    		match(RBRACK_TOK);
+    	}
+    	else if (currTok == VARIABLE_TOK) {
+    		// jbf : VARIABLE ALONE OR COMPARISON, PREDICTION PROBLEM
+    		currTok = lexer.getToken();
+    		switch (currTok) {
+    			case LT_TOK : case LE_TOK: case GT_TOK: 
+    			case GE_TOK: case EQ_TOK: case NE_TOK:
+    				relation(); intexpr();
+    				break;
+    			case MUL_TOK : case DIV_TOK: 
+    				intterm2(); relation(); intexpr();
+    				break;
+    			case PLUS_TOK : case MINUS_TOK: 
+    				intexpr2(); relation(); intexpr();
+    				break;
+    		}
+    	}
+    	else if (currTok == INTCONST_TOK || currTok == LPAR_TOK || currTok == MINUS_TOK) {
+    		intexpr();
+    		relation();
+    		intexpr();
+    	}
+    	else error("boolelement");
+    } /**
      * Fix common left prefix problem:
      * 	<relation> ::= <= | < | = | <> | >= | >
      * So that:
@@ -394,88 +439,50 @@ public class WrenRDP extends RDP implements WrenTokens {
     private void relation() {
     	//TODO: Is this done correctly?
     	switch (currTok) {
-    		case LT_TOK:
+    		case LE_TOK:
     			match(LE_TOK);
+    			break;
+    		case LT_TOK:
+    			match(LT_TOK);
     			relation2();
     			break;
     		case EQ_TOK:
     			match(EQ_TOK);
     			break;
+    		case GE_TOK:
+    			match(GE_TOK);
+    			break;
     		case GT_TOK:
     			match(GT_TOK);
-    			relation3();
+    			break;
     		default:
     			error("in relation()");
     			break;
     	}
     }
-    /**
-     * Created by me. This could be incorrect.
-     * <relation2> ::= EQ_TOK | GE_TOK | lambda
-     * So that:
-     *  first(<relation2>) = EQ_TOK U GE_TOK U lambda
-     */
     private void relation2() {
-    	if (currTok == EQ_TOK) {
-    		match(EQ_TOK);
-    	} else if (currTok == GE_TOK) {
-    		match(GE_TOK);
+    	if (currTok == LT_TOK) {
+    		match(LT_TOK);
     	} else {
     		//lambda, do nothing. 
     	}
     }
-    /**
-     * Created by me. This could be incorrect.
-     * <relation3> ::= EQ_TOK | lambda
-     * So that:
-     * 	first(<relation3>) = EQ_TOK U lambda
-     */
-    private void relation3() {
-    	if (currTok == EQ_TOK) {
-    		match(EQ_TOK);
+    private void weak_op() {
+    	if (currTok == PLUS_TOK) {
+    		match(PLUS_TOK);
+    	} else if (currTok == MINUS_TOK) {
+    		match(MINUS_TOK);
     	} else {
-    		//lambda, do nothing. 
+    		error("in weak_op()");
     	}
     }
-    /**
-     * Instructor provided function below
-     * DO NOT MODIFY
-     */
-    private void boolelement() {
-	if (currTok == TRUE_TOK) match(TRUE_TOK);
-	else if (currTok == FALSE_TOK) match(FALSE_TOK);
-	else if (currTok == NOT_TOK) {
-	    match(NOT_TOK);
-	    match(LBRACK_TOK);
-	    boolexpr();
-	    match(RBRACK_TOK);
-	}
-	else if (currTok == LBRACK_TOK) {
-	    match(LBRACK_TOK);
-	    boolexpr();
-	    match(RBRACK_TOK);
-	}
-	else if (currTok == VARIABLE_TOK) {
-	    // jbf : VARIABLE ALONE OR COMPARISON, PREDICTION PROBLEM
-	    currTok = lexer.getToken();
-	    switch (currTok) {
-	    case LT_TOK : case LE_TOK: case GT_TOK: 
-	    case GE_TOK: case EQ_TOK: case NE_TOK:
-		relation(); intexpr();
-		break;
-	    case MUL_TOK : case DIV_TOK: 
-		intterm2(); relation(); intexpr();
-		break;
-	    case PLUS_TOK : case MINUS_TOK: 
-	        intexpr2(); relation(); intexpr();
-		break;
-	    }
-	}
-	else if (currTok == INTCONST_TOK || currTok == LPAR_TOK || currTok == MINUS_TOK) {
-	    intexpr();
-	    relation();
-	    intexpr();
-	}
-	else error("boolelement");
+    private void strong_op() {
+    	if (currTok == MUL_TOK) {
+    		match(MUL_TOK);
+    	} else if (currTok == DIV_TOK) {
+    		match(DIV_TOK);
+    	} else {
+    		error("in strong_op()");
+    	}
     }
 }
