@@ -132,9 +132,7 @@ public class WrenRDP extends RDP implements WrenTokens {
      */
     private void commandseq() {
     	//Resolved left common prefix. 
-    	//TODO: Help filling out if statement?
-    	//	He said the if-check was still required.
-    	//if (currTok == first(<command>)
+    	//if (currTok == first(<command>))
     	switch(currTok) {
     		case SKIP_TOK:
     		case READ_TOK:
@@ -142,23 +140,22 @@ public class WrenRDP extends RDP implements WrenTokens {
     		case WHILE_TOK:
     		case IF_TOK:
     		//case first(<assign>):
-    		//TODO: find first(<assign>);
-    		//case first(<commandseq>)
-    		//TODO: resolve left common prefix in
-    		//	first(<commandseq>)
+    		case VARIABLE_TOK:
+    			match(currTok);
+    			commandseq2();
+    			break;
     		default: 
     			error("in commandSeq()");
     			break;
     	}
-    	/*
-    	if (currTok == ?) {
-    		command();
-    	} else {
-    		error("in commandseq()");
-    	}
-    	*/
     }
     private void commandseq2() {
+    	if (currTok == COLON_TOK) {
+    		match(COLON_TOK);
+    		commandseq();
+    	} else {
+    		//lambda. Do nothing.
+    	}
     }
     private void command() {
     	switch(currTok) {
@@ -182,82 +179,123 @@ public class WrenRDP extends RDP implements WrenTokens {
     			match(WHILE_TOK);
     			break;
     		case IF_TOK:
-    			//TODO: Warning: Nested If.
-    			//	Not sure if this is done according to correct methodology. 
+    			//TODO: Verify that this is correct.
     			match(IF_TOK);
     			boolexpr();
     			match(THEN_TOK);
     			commandseq();
-    			if (currTok == END_TOK) {
-    				match(END_TOK);
-    				match(IF_TOK);
-    				break;
-    			} else if (currTok == ELSE_TOK) {
-    				match(ELSE_TOK);
-    				break;
-    			} else {
-    				error("in command()");
-    				break;
-    			}
-    		//TODO: Fix below code.
+    			if2();
+    			break;
+    		//if (curTok == first(<assign>))
     		case VARIABLE_TOK:
-    			//IDENTIFIER
-    			match(VARIABLE_TOK);
-    		/*
-    		case commandseq():
-    			//do something?
-    		*/
+    			assign();
+    			break;
     		default:
     			error("in command()");
     			break;
     	}
     }
+    private void if2() {
+    	//TODO: Verify that this is correct
+    	if (currTok == END_TOK) {
+    		match(END_TOK);
+    		match(IF_TOK);
+    	} else if (currTok == ELSE_TOK) {
+    		match(ELSE_TOK);
+    		commandseq();
+    		match(END_TOK);
+    		match(IF_TOK);
+    	} else {
+    		error("in if2()");
+    	}
+    }
+    /**
+     * Resolve left-common prefix:
+     * 	<assign> ::= IDENTIFIER = <intexpr>
+     * 			| IDENTIFIER :=: <boolexpr>
+     * Where first(<assign>) = <assign2>
+     */
+    private void assign() {
+    	if (currTok == VARIABLE_TOK) {
+    		match(VARIABLE_TOK);
+    		assign2();
+    	} else {
+    		error("in assign()");
+    	}
+    }
+    /**
+     * <assign2> ::= :=: <boolexpr> | = <intexpr>
+     * first(<assign2>) = COLON_TOK | EQUAL_TOK
+     */
     private void assign2() {
-    	//TODO: I was very tired... make sure this is right.
-    	match(VARIABLE_TOK);
-    	if (currTok == EQ_TOK) {
-    		match(EQ_TOK);
+    	//Resolved common left prefix.
+    	if (currTok == INTASSIGN_TOK) {
     		intexpr();
-    	} else if (currTok == COLON_TOK) {
-    		match(COLON_TOK);
-    		match(EQ_TOK);
-    		match(COLON_TOK);
+    	} else if (currTok == BOOLASSIGN_TOK) {
     		boolexpr();
     	} else {
     		error("in assign2()");
     	}
     }
-    private void if2() {
-    	//TODO: method body.
-    }
+    /**
+     * <intexpr> ::= <intterm> | <intexpr> <weak_op> <intterm>
+     * Resolved L-recursion.
+     */
     private void intexpr() {
-    	//TODO: method body. Resolve L-recursion
+    	//TODO: Verify this is correct.
+    	//if (currTok == first(<intterm>))
+    	switch(currTok) {
+    		case INTCONST_TOK:
+    		case VARIABLE_TOK:
+    		case LPAR_TOK:
+    		case MINUS_TOK:
+    			intexpr2();
+    			break;
+    		default:
+    			error("in intexpr()");
+    			break;
+    	}
     }
     private void intexpr2() {
-    	//TODO: method body.
+    	//TODO: Verify this is correct.
+    	//if (currTok == first(<weak_op>))
+    	if (currTok == PLUS_TOK || currTok == MINUS_TOK) {
+    		weak_op();
+    		intterm();
+    		intexpr2();
+    	} else {
+    		//lambda, do nothing.
+    	}
     }
+    /**
+     * <intterm> ::= <intterm> <strongop> <element> | <element>
+     * Resolved L-recursion
+     */
     private void intterm() {
-    	//TODO: method body.
+    	//TODO: Verify this is correct.
+    	//if (currTok == first(<element>)
+    	switch(currTok) {
+    		case INTCONST_TOK:
+    		case VARIABLE_TOK:
+    		case LPAR_TOK:
+    		case MINUS_TOK:
+    			intelement();
+    			intterm2();
+    			break;
+    		default:
+    			error("in intterm()");
+    			break;
+    	}
     }
     private void intterm2() {
     	//TODO: method body.
-    }
-    private void strong_op() {
-    	if (currTok == MUL_TOK) {
-    		match(MUL_TOK);
-    	} else if (currTok == DIV_TOK) {
-    		match(DIV_TOK);
+    	//if (currTok == first(<strong_op>))
+    	if (currTok == MUL_TOK || currTok == DIV_TOK) {
+    		strong_op();
+    		intelement();
+    		intterm2();
     	} else {
-    		error("in strong_op()");
-    	}
-    }
-    private void weak_op() {
-    	if (currTok == PLUS_TOK) {
-    		match(PLUS_TOK);
-    	} else if (currTok == MINUS_TOK) {
-    		match(MINUS_TOK);
-    	} else {
-    		error("in weak_op()");
+    		//lambda, do nothing. 
     	}
     }
     private void intelement() {
@@ -275,7 +313,6 @@ public class WrenRDP extends RDP implements WrenTokens {
     			break;
     		case MINUS_TOK:
     			match(MINUS_TOK);
-    			//TODO: Recursive call correct here?
     			intelement();
     			break;
     		default:
@@ -283,79 +320,169 @@ public class WrenRDP extends RDP implements WrenTokens {
     			break;
     	}
     }
+    /**
+     * <boolexpr> ::= <boolexpr> or <boolterm> | <boolterm>
+     * Left recursion problem. A->AaB | B
+     */
     private void boolexpr() {
-    	//TODO: method body.
-    }
-    private void boolexpr2() {
-    	//TODO: method body.
-    }
-    private void boolterm() {
-    	//TODO: method body.
-    }
-    private void boolterm2() {
-    	//TODO: method body.
-    }
-    private void relation() {
-    	//TODO: method body.
-    	/* Figure out how to do this one...
-    	switch (currTok) {
-    		case LE_TOK:
-    			match(LE_TOK);
-    			break;
-    		case LT_TOK:
-    			match(LT_TOK);
-    			break;
-    		case EQ_TOK:
-    			match(EQ_TOK);
-    			break;
-    		case <>:
-    			match(?)
+    	//TODO: Verify this is correct.
+    	//if (currTok == first(<boolterm>))
+    	switch(currTok) {
+    		case TRUE_TOK:
+    		case FALSE_TOK:
+    		case NOT_TOK:
+    		case LBRACK_TOK:
+    		case VARIABLE_TOK:
+    		//first(<intexpr>)
+    		case INTCONST_TOK:
+    		//case VARIABLE_TOK:
+    		case LPAR_TOK:
+    		case MINUS_TOK:
+    			boolterm();
+    			boolexpr2();
     			break;
     		default:
-    			error("in relation()");
+    			error("in boolexpr()");
     			break;
     	}
-    	*/
+    }
+    private void boolexpr2() {
+    	//TODO: Verify this is correct.
+    	if (currTok == OR_TOK) {
+    		boolterm();
+    		boolexpr2();
+    	} else {
+    		//lambda, do nothing. 
+    	}
+    }
+    /**
+     * <boolterm> ::= <boolterm> and <boolelement> | <boolelement>
+     * Left recursion problem. A->AaB | B
+     * 
+     */
+    private void boolterm() {
+    	//Resolved L-recursion
+    	//if first(<boolelement>)
+    	switch(currTok) {
+    		case TRUE_TOK:
+    		case FALSE_TOK:
+    		case NOT_TOK:
+    		case LBRACK_TOK:
+    		case VARIABLE_TOK:
+    		//first(<intexpr>)?? 
+    		case INTCONST_TOK:
+    		//case VARIABLE_TOK
+    		case LPAR_TOK:
+    		case MINUS_TOK:
+    			boolterm();
+    			boolterm2();
+    			break;
+    	}
+    }
+    private void boolterm2() {
+    	if(currTok == AND_TOK) {
+    		match(AND_TOK);
+    		boolelement();
+    		boolterm2();
+    	} else {
+    		//lambda, do nothing.
+    	}
     }
     /**
      * Instructor provided function below
      * DO NOT MODIFY
      */
     private void boolelement() {
-	if (currTok == TRUE_TOK) match(TRUE_TOK);
-	else if (currTok == FALSE_TOK) match(FALSE_TOK);
-	else if (currTok == NOT_TOK) {
-	    match(NOT_TOK);
-	    match(LBRACK_TOK);
-	    boolexpr();
-	    match(RBRACK_TOK);
-	}
-	else if (currTok == LBRACK_TOK) {
-	    match(LBRACK_TOK);
-	    boolexpr();
-	    match(RBRACK_TOK);
-	}
-	else if (currTok == VARIABLE_TOK) {
-	    // jbf : VARIABLE ALONE OR COMPARISON, PREDICTION PROBLEM
-	    currTok = lexer.getToken();
-	    switch (currTok) {
-	    case LT_TOK : case LE_TOK: case GT_TOK: 
-	    case GE_TOK: case EQ_TOK: case NE_TOK:
-		relation(); intexpr();
-		break;
-	    case MUL_TOK : case DIV_TOK: 
-		intterm2(); relation(); intexpr();
-		break;
-	    case PLUS_TOK : case MINUS_TOK: 
-	        intexpr2(); relation(); intexpr();
-		break;
-	    }
-	}
-	else if (currTok == INTCONST_TOK || currTok == LPAR_TOK || currTok == MINUS_TOK) {
-	    intexpr();
-	    relation();
-	    intexpr();
-	}
-	else error("boolelement");
+    	if (currTok == TRUE_TOK) match(TRUE_TOK);
+    	else if (currTok == FALSE_TOK) match(FALSE_TOK);
+    	else if (currTok == NOT_TOK) {
+    		match(NOT_TOK);
+    		match(LBRACK_TOK);
+    		boolexpr();
+    		match(RBRACK_TOK);
+    	}
+    	else if (currTok == LBRACK_TOK) {
+    		match(LBRACK_TOK);
+    		boolexpr();
+    		match(RBRACK_TOK);
+    	}
+    	else if (currTok == VARIABLE_TOK) {
+    		// jbf : VARIABLE ALONE OR COMPARISON, PREDICTION PROBLEM
+    		currTok = lexer.getToken();
+    		switch (currTok) {
+    			case LT_TOK : case LE_TOK: case GT_TOK: 
+    			case GE_TOK: case EQ_TOK: case NE_TOK:
+    				relation(); intexpr();
+    				break;
+    			case MUL_TOK : case DIV_TOK: 
+    				intterm2(); relation(); intexpr();
+    				break;
+    			case PLUS_TOK : case MINUS_TOK: 
+    				intexpr2(); relation(); intexpr();
+    				break;
+    		}
+    	}
+    	else if (currTok == INTCONST_TOK || currTok == LPAR_TOK || currTok == MINUS_TOK) {
+    		intexpr();
+    		relation();
+    		intexpr();
+    	}
+    	else error("boolelement");
+    } /**
+     * Fix common left prefix problem:
+     * 	<relation> ::= <= | < | = | <> | >= | >
+     * So that:
+     * 	<relation> ::= <relation2> | = | <relation3>
+     * Hence:
+     *  first(<relation>) = first(<relation2>) U EQ_TOK U first(<relation3>)
+     */
+    private void relation() {
+    	//TODO: Is this done correctly?
+    	switch (currTok) {
+    		case LE_TOK:
+    			match(LE_TOK);
+    			break;
+    		case LT_TOK:
+    			match(LT_TOK);
+    			relation2();
+    			break;
+    		case EQ_TOK:
+    			match(EQ_TOK);
+    			break;
+    		case GE_TOK:
+    			match(GE_TOK);
+    			break;
+    		case GT_TOK:
+    			match(GT_TOK);
+    			break;
+    		default:
+    			error("in relation()");
+    			break;
+    	}
+    }
+    private void relation2() {
+    	if (currTok == LT_TOK) {
+    		match(LT_TOK);
+    	} else {
+    		//lambda, do nothing. 
+    	}
+    }
+    private void weak_op() {
+    	if (currTok == PLUS_TOK) {
+    		match(PLUS_TOK);
+    	} else if (currTok == MINUS_TOK) {
+    		match(MINUS_TOK);
+    	} else {
+    		error("in weak_op()");
+    	}
+    }
+    private void strong_op() {
+    	if (currTok == MUL_TOK) {
+    		match(MUL_TOK);
+    	} else if (currTok == DIV_TOK) {
+    		match(DIV_TOK);
+    	} else {
+    		error("in strong_op()");
+    	}
     }
 }
