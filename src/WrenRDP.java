@@ -180,7 +180,6 @@ public class WrenRDP extends RDP implements WrenTokens {
     			match(WHILE_TOK);
     			break;
     		case IF_TOK:
-    			//TODO: Verify that this is correct.
     			match(IF_TOK);
     			boolexpr();
     			match(THEN_TOK);
@@ -197,7 +196,6 @@ public class WrenRDP extends RDP implements WrenTokens {
     	}
     }
     private void if2() {
-    	//TODO: Verify that this is correct
     	if (currTok == END_TOK) {
     		match(END_TOK);
     		match(IF_TOK);
@@ -231,8 +229,10 @@ public class WrenRDP extends RDP implements WrenTokens {
     private void assign2() {
     	//Resolved common left prefix.
     	if (currTok == INTASSIGN_TOK) {
+    		match(INTASSIGN_TOK);
     		intexpr();
     	} else if (currTok == BOOLASSIGN_TOK) {
+    		match(BOOLASSIGN_TOK);
     		boolexpr();
     	} else {
     		error("in assign2()");
@@ -243,22 +243,21 @@ public class WrenRDP extends RDP implements WrenTokens {
      * Resolved L-recursion.
      */
     private void intexpr() {
-    	//TODO: Verify this is correct.
     	//if (currTok == first(<intterm>))
     	switch(currTok) {
     		case INTCONST_TOK:
     		case VARIABLE_TOK:
     		case LPAR_TOK:
     		case MINUS_TOK:
+    			intterm();
     			intexpr2();
     			break;
     		default:
-    			error("in intexpr()");
+    			error("in intexpr() or currTok: " + currTok);
     			break;
     	}
     }
     private void intexpr2() {
-    	//TODO: Verify this is correct.
     	//if (currTok == first(<weak_op>))
     	if (currTok == PLUS_TOK || currTok == MINUS_TOK) {
     		weak_op();
@@ -273,7 +272,6 @@ public class WrenRDP extends RDP implements WrenTokens {
      * Resolved L-recursion
      */
     private void intterm() {
-    	//TODO: Verify this is correct.
     	//if (currTok == first(<element>)
     	switch(currTok) {
     		case INTCONST_TOK:
@@ -289,7 +287,6 @@ public class WrenRDP extends RDP implements WrenTokens {
     	}
     }
     private void intterm2() {
-    	//TODO: method body.
     	//if (currTok == first(<strong_op>))
     	if (currTok == MUL_TOK || currTok == DIV_TOK) {
     		strong_op();
@@ -326,7 +323,6 @@ public class WrenRDP extends RDP implements WrenTokens {
      * Left recursion problem. A->AaB | B
      */
     private void boolexpr() {
-    	//TODO: Verify this is correct.
     	//if (currTok == first(<boolterm>))
     	switch(currTok) {
     		case TRUE_TOK:
@@ -343,13 +339,13 @@ public class WrenRDP extends RDP implements WrenTokens {
     			boolexpr2();
     			break;
     		default:
-    			error("in boolexpr()");
+    			error("in boolexpr(): currTok=" + currTok);
     			break;
     	}
     }
     private void boolexpr2() {
-    	//TODO: Verify this is correct.
     	if (currTok == OR_TOK) {
+    		match(OR_TOK);
     		boolterm();
     		boolexpr2();
     	} else {
@@ -375,8 +371,11 @@ public class WrenRDP extends RDP implements WrenTokens {
     		//case VARIABLE_TOK
     		case LPAR_TOK:
     		case MINUS_TOK:
-    			boolterm();
+    			boolelement();
     			boolterm2();
+    			break;
+    		default:
+    			error("in boolterm() + currTok: " + currTok);
     			break;
     	}
     }
@@ -438,17 +437,18 @@ public class WrenRDP extends RDP implements WrenTokens {
      *  first(<relation>) = first(<relation2>) U EQ_TOK U first(<relation3>)
      */
     private void relation() {
-    	//TODO: Is this done correctly?
     	switch (currTok) {
     		case LE_TOK:
     			match(LE_TOK);
     			break;
     		case LT_TOK:
     			match(LT_TOK);
-    			relation2();
     			break;
     		case EQ_TOK:
     			match(EQ_TOK);
+    			break;
+    		case NE_TOK:
+    			match(NE_TOK);
     			break;
     		case GE_TOK:
     			match(GE_TOK);
@@ -457,15 +457,8 @@ public class WrenRDP extends RDP implements WrenTokens {
     			match(GT_TOK);
     			break;
     		default:
-    			error("in relation()");
+    			error("in relation() + currTok: " + currTok);
     			break;
-    	}
-    }
-    private void relation2() {
-    	if (currTok == LT_TOK) {
-    		match(LT_TOK);
-    	} else {
-    		//lambda, do nothing. 
     	}
     }
     private void weak_op() {
