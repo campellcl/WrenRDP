@@ -1,22 +1,22 @@
 public class WrenRDP extends RDP implements WrenTokens {
     public static void main(String args[]) {
-	String input = "";
-	if (args.length == 0) {
-	    System.out.println("Need program-string arg.");
-	    System.out.println("Example use: java WrenRDP \"`cat test.w`\"");
-	    System.exit(1);
-	}
-	for (String s : args)
-	    input = input + s + "\n";
+    	String input = "";
+    	if (args.length == 0) {
+    		System.out.println("Need program-string arg.");
+    		System.out.println("Example use: java WrenRDP \"`cat test.w`\"");
+    		System.exit(1);
+    	}
+    	for (String s : args)
+    		input = input + s + "\n";
 
-	WrenRDP p = new WrenRDP(input);
-	p.parse();
+    	WrenRDP p = new WrenRDP(input);
+			p.parse();
     }
     public WrenRDP(String input) {
-	lexer = new WrenLexer(input);
+    	lexer = new WrenLexer(input);
     }
     public void StartSymbol() {
-	program();
+    	program();
     }
     private void program() {
     	if (currTok == PROG_TOK) {
